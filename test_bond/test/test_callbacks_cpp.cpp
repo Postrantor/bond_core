@@ -28,27 +28,25 @@
  */
 
 #include <gtest/gtest.h>
-#include <string>
+
 #include <chrono>
+#include <string>
 
 #ifndef _WIN32
-# include <uuid/uuid.h>
+#include <uuid/uuid.h>
 #else
-# include <rpc.h>
+#include <rpc.h>
 #endif
 
 #include "bondcpp/bond.hpp"
-
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp_lifecycle/lifecycle_node.hpp"
-
 #include "test_bond/srv/test_bond.hpp"
 
 using namespace std::chrono_literals;
 
 const char TOPIC[] = "test_bond_topic";
-std::string genId()
-{
+std::string genId() {
 #ifndef _WIN32
   uuid_t uuid;
   uuid_generate_random(uuid);
@@ -66,41 +64,29 @@ std::string genId()
 #endif
 }
 
-class TestCallbacksCpp : public ::testing::Test
-{
+class TestCallbacksCpp : public ::testing::Test {
 public:
-  static void SetUpTestCase()
-  {
-    rclcpp::init(0, nullptr);
-  }
+  static void SetUpTestCase() { rclcpp::init(0, nullptr); }
 
-  static void TearDownTestCase()
-  {
-    rclcpp::shutdown();
-  }
+  static void TearDownTestCase() { rclcpp::shutdown(); }
 };
 
-TEST_F(TestCallbacksCpp, dieInLifeCallback)
-{
+TEST_F(TestCallbacksCpp, dieInLifeCallback) {
   auto nh1 = rclcpp::Node::make_shared("test_callbacks_cpp");
   std::string id1 = genId();
   bond::Bond a(TOPIC, id1, nh1);
   bond::Bond b(TOPIC, id1, nh1);
 
-  a.setFormedCallback(
-    [&a]() {
-      a.breakBond();
-    });
+  a.setFormedCallback([&a]() { a.breakBond(); });
   a.start();
   b.start();
 
-  std::atomic<bool> isRunning {true};
-  auto runThread = std::thread(
-    [&isRunning, &nh1]() {
-      while (isRunning) {
-        rclcpp::spin_some(nh1);
-      }
-    });
+  std::atomic<bool> isRunning{true};
+  auto runThread = std::thread([&isRunning, &nh1]() {
+    while (isRunning) {
+      rclcpp::spin_some(nh1);
+    }
+  });
 
   EXPECT_TRUE(a.waitUntilFormed(rclcpp::Duration(5.0s)));
   EXPECT_TRUE(b.waitUntilBroken(rclcpp::Duration(3.0s)));
@@ -109,21 +95,19 @@ TEST_F(TestCallbacksCpp, dieInLifeCallback)
   runThread.join();
 }
 
-TEST_F(TestCallbacksCpp, remoteNeverConnects)
-{
+TEST_F(TestCallbacksCpp, remoteNeverConnects) {
   auto nh2 = rclcpp::Node::make_shared("test_callbacks_cpp_2");
   std::string id2 = genId();
   bond::Bond a1(TOPIC, id2, nh2);
 
   a1.start();
 
-  std::atomic<bool> isRunning {true};
-  auto runThread = std::thread(
-    [&isRunning, &nh2]() {
-      while (isRunning) {
-        rclcpp::spin_some(nh2);
-      }
-    });
+  std::atomic<bool> isRunning{true};
+  auto runThread = std::thread([&isRunning, &nh2]() {
+    while (isRunning) {
+      rclcpp::spin_some(nh2);
+    }
+  });
 
   EXPECT_FALSE(a1.waitUntilFormed(rclcpp::Duration(4.0s)));
   EXPECT_TRUE(a1.waitUntilBroken(rclcpp::Duration(10.0s)));

@@ -32,6 +32,9 @@
 #ifndef BONDCPP__BOND_HPP_
 #define BONDCPP__BOND_HPP_
 
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_lifecycle/lifecycle_node.hpp>
+
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -41,146 +44,168 @@
 
 #include "bond/msg/constants.hpp"
 #include "bond/msg/status.hpp"
-
 #include "bondcpp/BondSM_sm.hpp"
 
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp_lifecycle/lifecycle_node.hpp>
+namespace bond {
 
-namespace bond
-{
-/** \brief Forms a bond to monitor another process.
- *
- * The bond::Bond class implements a bond, allowing you to monitor
- * another process and be notified when it dies.  In turn, it will be
- * notified when you die.
+/**
+ * @brief
+ * Bond类用于创建一个bond，以便监视另一个进程，并在它死亡时得到通知。同时，当你死亡时，它也会得到通知。
  */
-class Bond
-{
+class Bond {
 public:
-  using EventCallback = std::function<void (void)>;
+  using EventCallback = std::function<void(void)>;
 
-  /** \brief Constructor to delegate common functionality
+  /**
+   * @brief 委托构造函数
    *
-   * \param topic The topic used to exchange the bond status messages.
-   * \param id The ID of the bond, which should match the ID used on
-   *           the sister's end.
-   * \param node_base base node interface
-   * \param node_logging logging node interface
-   * \param node_timers timers node interface
-   * \param on_broken callback that will be called when the bond is broken.
-   * \param on_formed callback that will be called when the bond is formed.
+   * @param topic 用于交换bond状态消息的话题。
+   * @param id bond的ID，应与姐妹端使用的ID匹配。
+   * @param node_base 节点基本接口
+   * @param node_logging 节点日志接口
+   * @param node_params 节点参数接口
+   * @param node_timers 节点定时器接口
+   * @param node_topics 节点话题接口
+   * @param on_broken 当bond断开连接时调用的回调函数。
+   * @param on_formed 当bond建立连接时调用的回调函数。
    */
   Bond(
-    const std::string & topic, const std::string & id,
-    rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
-    rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
-    rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
-    rclcpp::node_interfaces::NodeTimersInterface::SharedPtr node_timers,
-    rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics,
-    EventCallback on_broken = EventCallback(),
-    EventCallback on_formed = EventCallback());
+      const std::string& topic,
+      const std::string& id,
+      rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base,
+      rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging,
+      rclcpp::node_interfaces::NodeParametersInterface::SharedPtr node_params,
+      rclcpp::node_interfaces::NodeTimersInterface::SharedPtr node_timers,
+      rclcpp::node_interfaces::NodeTopicsInterface::SharedPtr node_topics,
+      EventCallback on_broken = EventCallback(),
+      EventCallback on_formed = EventCallback());
 
-  /** \brief Constructs a bond, but does not connect
+  /**
+   * @brief 构造一个bond，但不连接
    *
-   * \param topic The topic used to exchange the bond status messages.
-   * \param id The ID of the bond, which should match the ID used on
-   *           the sister's end.
-   * \param nh Lifecycle Node shared ptr.
-   * \param on_broken callback that will be called when the bond is broken.
-   * \param on_formed callback that will be called when the bond is formed.
+   * @param topic 用于交换bond状态消息的话题。
+   * @param id bond的ID，应与姐妹端使用的ID匹配。
+   * @param nh 生命周期节点的共享指针。
+   * @param on_broken 当bond断开连接时调用的回调函数。
+   * @param on_formed 当bond建立连接时调用的回调函数。
    */
   Bond(
-    const std::string & topic, const std::string & id,
-    rclcpp_lifecycle::LifecycleNode::SharedPtr nh,
-    EventCallback on_broken = EventCallback(),
-    EventCallback on_formed = EventCallback());
+      const std::string& topic,
+      const std::string& id,
+      rclcpp_lifecycle::LifecycleNode::SharedPtr nh,
+      EventCallback on_broken = EventCallback(),
+      EventCallback on_formed = EventCallback());
 
-  /** \brief Constructs a bond, but does not connect
+  /**
+   * @brief 构造一个bond，但不连接
    *
-   * \param topic The topic used to exchange the bond status messages.
-   * \param id The ID of the bond, which should match the ID used on
-   *           the sister's end.
-   * \param nh Node shared ptr.
-   * \param on_broken callback that will be called when the bond is broken.
-   * \param on_formed callback that will be called when the bond is formed.
+   * @param topic 用于交换bond状态消息的话题。
+   * @param id bond的ID，应与姐妹端使用的ID匹配。
+   * @param nh 节点的共享指针。
+   * @param on_broken 当bond断开连接时调用的回调函数。
+   * @param on_formed 当bond建立连接时调用的回调函数。
    */
   Bond(
-    const std::string & topic, const std::string & id,
-    rclcpp::Node::SharedPtr nh,
-    EventCallback on_broken = EventCallback(),
-    EventCallback on_formed = EventCallback());
+      const std::string& topic,
+      const std::string& id,
+      rclcpp::Node::SharedPtr nh,
+      EventCallback on_broken = EventCallback(),
+      EventCallback on_formed = EventCallback());
 
-  /** \brief Destructs the object, breaking the bond if it is still formed.
+  /**
+   * @brief 析构函数，如果仍然连接，则断开bond。
    */
   ~Bond();
 
+  /*
+  该代码段定义了一些用于连接、断开连接、心跳检测和消息发布的计时器相关函数。其中，包括设置连接超时时间、断开连接超时时间、心跳超时时间、心跳周期、死亡发布周期等函数。这些函数可以帮助用户在
+  ros2 项目中实现对连接状态的监测和控制，保证通信的稳定性和可靠性。
+  */
   void setupConnections();
 
-  double getConnectTimeout() const {return connect_timeout_.seconds();}
+  double getConnectTimeout() const { return connect_timeout_.seconds(); }
   void setConnectTimeout(double dur);
   void connectTimerReset();
   void connectTimerCancel();
 
-  double getDisconnectTimeout() const {return disconnect_timeout_.seconds();}
+  double getDisconnectTimeout() const { return disconnect_timeout_.seconds(); }
   void setDisconnectTimeout(double dur);
   void disconnectTimerReset();
   void disconnectTimerCancel();
 
-  double getHeartbeatTimeout() const {return heartbeat_timeout_.seconds();}
+  double getHeartbeatTimeout() const { return heartbeat_timeout_.seconds(); }
   void setHeartbeatTimeout(double dur);
   void heartbeatTimerReset();
   void heartbeatTimerCancel();
 
-  double getHeartbeatPeriod() const {return heartbeat_period_.seconds();}
+  double getHeartbeatPeriod() const { return heartbeat_period_.seconds(); }
   void setHeartbeatPeriod(double dur);
   void publishingTimerReset();
   void publishingTimerCancel();
 
-  double getDeadPublishPeriod() const {return dead_publish_period_.seconds();}
+  double getDeadPublishPeriod() const { return dead_publish_period_.seconds(); }
   void setDeadPublishPeriod(double dur);
   void deadpublishingTimerReset();
   void deadpublishingTimerCancel();
 
-  /** \brief Starts the bond and connects to the sister process.
+  /*
+    - `start()`：启动 Bond 并连接姐妹进程。
+    - `setFormedCallback(EventCallback on_formed)`：设置组件形成时的回调函数。
+    - `setBrokenCallback(EventCallback on_broken)`：设置组件断开时的回调函数。
+    - `waitUntilFormed(rclcpp::Duration timeout =
+    rclcpp::Duration(std::chrono::seconds(-1)))`：阻塞等待组件形成，最多等待 `timeout` 时间。
+    - `waitUntilBroken(rclcpp::Duration timeout =
+    rclcpp::Duration(std::chrono::seconds(-1)))`：阻塞等待组件断开，最多等待 `timeout` 时间。
+    - `isBroken()`：指示 Bond 是否已经断开。
+    - `breakBond()`：断开 Bond，通知另一个进程。
+  */
+  /**
+   * @brief Bond 组件的启动函数，用于连接姐妹进程。
    */
   void start();
 
-  /** \brief Sets the formed callback.
+  /**
+   * @brief 设置组件形成时的回调函数。
+   * @param on_formed 形成时的回调函数。
    */
   void setFormedCallback(EventCallback on_formed);
 
-  /** \brief Sets the broken callback
+  /**
+   * @brief 设置组件断开时的回调函数。
+   * @param on_broken 断开时的回调函数。
    */
   void setBrokenCallback(EventCallback on_broken);
 
-  /** \brief Blocks until the bond is formed for at most 'duration'.
-   *    Assumes the node to be spinning in the background
-   *
-   * \param timeout Maximum duration to wait.  If -1 then this call will not timeout.
-   * \return true iff the bond has been formed.
+  /**
+   * @brief 阻塞等待组件形成，最多等待 'duration' 时间。
+   *        假设节点在后台运行。
+   * @param timeout 最长等待时间。如果为 -1，则此调用不会超时。
+   * @return 如果已经形成 Bond，则返回 true。
    */
   bool waitUntilFormed(rclcpp::Duration timeout = rclcpp::Duration(std::chrono::seconds(-1)));
 
-  /** \brief Blocks until the bond is broken for at most 'duration'.
-   *    Assumes the node to be spinning in the background
-   *
-   * \param timeout Maximum duration to wait.  If -1 then this call will not timeout.
-   * \return true iff the bond has been broken, even if it has never been formed.
+  /**
+   * @brief 阻塞等待组件断开，最多等待 'duration' 时间。
+   *        假设节点在后台运行。
+   * @param timeout 最长等待时间。如果为 -1，则此调用不会超时。
+   * @return 如果 Bond 已经断开，则返回 true，即使它从未形成过。
    */
   bool waitUntilBroken(rclcpp::Duration timeout = rclcpp::Duration(std::chrono::seconds(-1)));
 
-  /** \brief Indicates if the bond is broken.
+  /**
+   * @brief 指示 Bond 是否已经断开。
+   * @return 如果 Bond 已经断开，则返回 true。
    */
   bool isBroken();
 
-  /** \brief Breaks the bond, notifying the other process.
+  /**
+   * @brief 断开 Bond，通知另一个进程。
    */
   void breakBond();
 
-  std::string getTopic() const {return topic_;}
-  std::string getId() const {return id_;}
-  std::string getInstanceId() const {return instance_id_;}
+  std::string getTopic() const { return topic_; }
+  std::string getId() const { return id_; }
+  std::string getInstanceId() const { return instance_id_; }
 
 private:
   friend struct ::BondSM;
@@ -189,7 +214,7 @@ private:
   void onHeartbeatTimeout();
   void onDisconnectTimeout();
 
-  void bondStatusCB(const bond::msg::Status & msg);
+  void bondStatusCB(const bond::msg::Status& msg);
 
   void doPublishing();
   void publishStatus(bool active);
@@ -200,7 +225,6 @@ private:
   bool isStateAwaitSisterDeath();
   bool isStateDead();
   bool isStateWaitingForSister();
-
 
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr node_base_;
   rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logging_;
@@ -226,12 +250,12 @@ private:
   EventCallback on_broken_;
   EventCallback on_formed_;
 
-  bool sisterDiedFirst_ {false};
-  bool started_ {false};
-  bool connect_timer_reset_flag_ {false};
-  bool disconnect_timer_reset_flag_ {false};
-  bool deadpublishing_timer_reset_flag_ {false};
-  bool disable_heartbeat_timeout_ {false};
+  bool sisterDiedFirst_{false};
+  bool started_{false};
+  bool connect_timer_reset_flag_{false};
+  bool disconnect_timer_reset_flag_{false};
+  bool deadpublishing_timer_reset_flag_{false};
+  bool disable_heartbeat_timeout_{false};
 
   rclcpp::Duration connect_timeout_;
   rclcpp::Duration disconnect_timeout_;
@@ -245,19 +269,18 @@ private:
 }  // namespace bond
 
 // Internal use only
-struct BondSM
-{
-  explicit BondSM(bond::Bond * b_)
-  : b(b_) {}
+// 定义了一个名为BondSM的结构体，用于处理bond状态机的不同事件
+struct BondSM {
+  explicit BondSM(bond::Bond* b_) : b(b_) {}
 
-  void Connected();
-  void SisterDied();
-  void Death();
-  void Heartbeat();
-  void StartDying();
+  void Connected();   // 处理连接成功事件。
+  void SisterDied();  // 处理sister死亡事件。
+  void Death();       // 处理bond死亡事件。
+  void Heartbeat();   // 处理心跳事件。
+  void StartDying();  // 开始死亡过程。
 
 private:
-  bond::Bond * b;
+  bond::Bond* b;
 };
 
 #endif  // BONDCPP__BOND_HPP_

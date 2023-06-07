@@ -39,7 +39,6 @@
  * from file : BondSM_sm.sm
  */
 
-
 #define SMC_USES_IOSTREAMS
 
 #include "smclib/statemap.hpp"
@@ -55,172 +54,253 @@ class BondSMState;
 class BondSMContext;
 struct BondSM;
 
-class BondSMState
-  : public statemap::State
-{
+/*
+  上述代码段定义了一个 bondcpp 组件相关的状态机。其中，BondSMState 类继承自 statemap::State
+  类，用于定义状态机的状态，并包含了状态机的入口、出口和各种事件处理函数；SM
+  类用于定义状态机的各个状态，包括等待 sister 连接状态、bond 存活状态、等待 sister 死亡状态和 bond
+  死亡状态；SM_Default 类继承自 BondSMState
+  类，用于定义状态机的默认状态。其中，每个状态都有对应的事件处理函数，如 ConnectTimeout
+  处理连接超时事件，Die 处理 bond
+  死亡事件等。在状态机运行过程中，当发生对应事件时，状态机会根据当前状态调用相应的事件处理函数进行处理。
+*/
+/**
+ * @brief BondSMState类，继承自statemap::State，用于定义bond状态机的状态
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 定义了状态机的入口、出口和各种事件处理函数
+ */
+class BondSMState : public statemap::State {
 public:
-  BondSMState(const char * name, int stateId)
-  : statemap::State(name, stateId)
-  {}
+  BondSMState(const char *name, int stateId) : statemap::State(name, stateId) {}
 
-  virtual void Entry(BondSMContext &) {}
-  virtual void Exit(BondSMContext &) {}
+  virtual void Entry(BondSMContext &) {}  // 状态机进入该状态时执行的函数
+  virtual void Exit(BondSMContext &) {}   // 状态机从该状态退出时执行的函数
 
-  virtual void ConnectTimeout(BondSMContext & context);
-  virtual void Die(BondSMContext & context);
-  virtual void DisconnectTimeout(BondSMContext & context);
-  virtual void HeartbeatTimeout(BondSMContext & context);
-  virtual void SisterAlive(BondSMContext & context);
-  virtual void SisterDead(BondSMContext & context);
+  virtual void ConnectTimeout(BondSMContext &context);     // 处理连接超时事件
+  virtual void Die(BondSMContext &context);                // 处理bond死亡事件
+  virtual void DisconnectTimeout(BondSMContext &context);  // 处理断开连接超时事件
+  virtual void HeartbeatTimeout(BondSMContext &context);   // 处理心跳超时事件
+  virtual void SisterAlive(BondSMContext &context);        // 处理sister存活事件
+  virtual void SisterDead(BondSMContext &context);         // 处理sister死亡事件
 
 protected:
-  virtual void Default(BondSMContext & context);
+  virtual void Default(BondSMContext &context);  // 默认事件处理函数
 };
 
-class SM
-{
+/**
+ * @brief SM类，用于定义bond状态机的各个状态
+ * @details 包含WaitingForSister、Alive、AwaitSisterDeath、Dead四种状态
+ */
+class SM {
 public:
-  static SM_WaitingForSister WaitingForSister;
-  static SM_Alive Alive;
-  static SM_AwaitSisterDeath AwaitSisterDeath;
-  static SM_Dead Dead;
+  static SM_WaitingForSister WaitingForSister;  // 等待sister连接状态
+  static SM_Alive Alive;                        // bond存活状态
+  static SM_AwaitSisterDeath AwaitSisterDeath;  // 等待sister死亡状态
+  static SM_Dead Dead;                          // bond死亡状态
 };
 
-class SM_Default
-  : public BondSMState
-{
+/**
+ * @brief SM_Default类，继承自BondSMState，用于定义bond状态机的默认状态
+ * @param name 状态名称
+ * @param stateId 状态ID
+ */
+class SM_Default : public BondSMState {
 public:
-  SM_Default(const char * name, int stateId)
-  : BondSMState(name, stateId)
-  {}
+  SM_Default(const char *name, int stateId) : BondSMState(name, stateId) {}
 };
 
-class SM_WaitingForSister
-  : public SM_Default
-{
-public:
-  SM_WaitingForSister(const char * name, int stateId)
-  : SM_Default(name, stateId)
-  {}
+// clang-format off
+/*
+该代码段定义了一个状态机的默认状态类 SM_Default 和四个不同的状态类 SM_WaitingForSister、SM_Alive、SM_AwaitSisterDeath 和 SM_Dead，这些状态类都继承自 SM_Default 类，并重写了其中的部分回调函数。每个状态类都有一个名称和一个状态ID，用于标识该状态。
 
-  void ConnectTimeout(BondSMContext & context);
-  void Die(BondSMContext & context);
-  void SisterAlive(BondSMContext & context);
-  void SisterDead(BondSMContext & context);
+在 SM_Default 类中定义了多个虚函数，用于处理状态机中的各种事件。在具体的状态类中，根据需要重写了其中的部分回调函数。例如，在 SM_WaitingForSister 类中，重写了 ConnectTimeout、Die、SisterAlive 和 SisterDead 四个回调函数，用于处理等待姐妹连接时可能发生的事件。在 SM_Alive 类中，重写了 Die、HeartbeatTimeout、SisterAlive 和 SisterDead 四个回调函数，用于处理姐妹已连接时可能发生的事件。在 SM_AwaitSisterDeath 类中，重写了 Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive 和 SisterDead 五个回调函数，用于处理等待姐妹断开连接时可能发生的事件。在 SM_Dead 类中，重写了 ConnectTimeout、Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive 和 SisterDead 六个回调函数，用于处理姐妹已断开连接时可能发生的事件。
+
+这些状态类的具体实现需要根据实际需求进行编写。
+*/
+// clang-format on
+/**
+ * @brief 状态机的默认状态类
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 用于定义状态机中的各种状态，包含多个回调函数，用于处理不同的事件。
+ */
+class SM_Default {
+public:
+  SM_Default(const char *name, int stateId) : name_(name), stateId_(stateId) {}
+
+  virtual void ConnectTimeout(BondSMContext &context) {}
+  virtual void DisconnectTimeout(BondSMContext &context) {}
+  virtual void Die(BondSMContext &context) {}
+  virtual void HeartbeatTimeout(BondSMContext &context) {}
+  virtual void SisterAlive(BondSMContext &context) {}
+  virtual void SisterDead(BondSMContext &context) {}
+
+  const char *name_;
+  int stateId_;
 };
 
-class SM_Alive
-  : public SM_Default
-{
+/**
+ * @brief 等待姐妹连接的状态类
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 继承自 SM_Default 类，重写了 ConnectTimeout、Die、SisterAlive 和 SisterDead
+ * 四个回调函数。
+ */
+class SM_WaitingForSister : public SM_Default {
 public:
-  SM_Alive(const char * name, int stateId)
-  : SM_Default(name, stateId)
-  {}
+  SM_WaitingForSister(const char *name, int stateId) : SM_Default(name, stateId) {}
 
-  void Die(BondSMContext & context);
-  void HeartbeatTimeout(BondSMContext & context);
-  void SisterAlive(BondSMContext & context);
-  void SisterDead(BondSMContext & context);
+  void ConnectTimeout(BondSMContext &context);
+  void Die(BondSMContext &context);
+  void SisterAlive(BondSMContext &context);
+  void SisterDead(BondSMContext &context);
 };
 
-class SM_AwaitSisterDeath
-  : public SM_Default
-{
+/**
+ * @brief 姐妹已连接的状态类
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 继承自 SM_Default 类，重写了 Die、HeartbeatTimeout、SisterAlive 和 SisterDead
+ * 四个回调函数。
+ */
+class SM_Alive : public SM_Default {
 public:
-  SM_AwaitSisterDeath(const char * name, int stateId)
-  : SM_Default(name, stateId)
-  {}
+  SM_Alive(const char *name, int stateId) : SM_Default(name, stateId) {}
 
-  void Die(BondSMContext & context);
-  void DisconnectTimeout(BondSMContext & context);
-  void HeartbeatTimeout(BondSMContext & context);
-  void SisterAlive(BondSMContext & context);
-  void SisterDead(BondSMContext & context);
+  void Die(BondSMContext &context);
+  void HeartbeatTimeout(BondSMContext &context);
+  void SisterAlive(BondSMContext &context);
+  void SisterDead(BondSMContext &context);
 };
 
-class SM_Dead
-  : public SM_Default
-{
+/**
+ * @brief 等待姐妹断开连接的状态类
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 继承自 SM_Default 类，重写了 Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive 和
+ * SisterDead 五个回调函数。
+ */
+class SM_AwaitSisterDeath : public SM_Default {
 public:
-  SM_Dead(const char * name, int stateId)
-  : SM_Default(name, stateId)
-  {}
+  SM_AwaitSisterDeath(const char *name, int stateId) : SM_Default(name, stateId) {}
 
-  void ConnectTimeout(BondSMContext & context);
-  void Die(BondSMContext & context);
-  void DisconnectTimeout(BondSMContext & context);
-  void HeartbeatTimeout(BondSMContext & context);
-  void SisterAlive(BondSMContext & context);
-  void SisterDead(BondSMContext & context);
+  void Die(BondSMContext &context);
+  void DisconnectTimeout(BondSMContext &context);
+  void HeartbeatTimeout(BondSMContext &context);
+  void SisterAlive(BondSMContext &context);
+  void SisterDead(BondSMContext &context);
 };
 
-class BondSMContext
-  : public statemap::FSMContext
-{
+/**
+ * @brief 姐妹已断开连接的状态类
+ * @param name 状态名称
+ * @param stateId 状态ID
+ * @details 继承自 SM_Default 类，重写了
+ * ConnectTimeout、Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive 和 SisterDead
+ * 六个回调函数。
+ */
+class SM_Dead : public SM_Default {
 public:
-  explicit BondSMContext(BondSM & owner)
-  : FSMContext(SM::WaitingForSister),
-    _owner(owner)
-  {}
+  SM_Dead(const char *name, int stateId) : SM_Default(name, stateId) {}
 
-  BondSMContext(BondSM & owner, const statemap::State & state)
-  : FSMContext(state),
-    _owner(owner)
-  {}
+  void ConnectTimeout(BondSMContext &context);
+  void Die(BondSMContext &context);
+  void DisconnectTimeout(BondSMContext &context);
+  void HeartbeatTimeout(BondSMContext &context);
+  void SisterAlive(BondSMContext &context);
+  void SisterDead(BondSMContext &context);
+};
 
-  virtual void enterStartState()
-  {
-    getState().Entry(*this);
-  }
+// clang-format off
+/*
+该代码段是一个状态机上下文类，用于维护当前状态和状态机的所有信息，并提供了一些接口函数来操作状态机。其中，构造函数用于初始化状态机上下文对象，enterStartState函数用于进入状态机的起始状态，getOwner函数用于获取BondSM对象的引用，getState函数用于获取当前状态，ConnectTimeout、Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive和SisterDead函数分别用于处理连接超时、组件死亡、断开连接超时、心跳超时、姐妹组件存活和姐妹组件死亡等事件。在实现过程中，该类继承自statemap::FSMContext类，通过调用基类的构造函数来初始化状态机上下文对象，并将初始状态设置为SM::WaitingForSister。同时，它还保存了BondSM对象的引用，并提供了一些接口函数来操作状态机。
+*/
+// clang-format on
+/**
+ * @brief BondSMContext类是一个状态机上下文类，继承自statemap::FSMContext。
+ * @details 它包含了当前状态和状态机的所有信息，并提供了一些接口函数来操作状态机。
+ */
+class BondSMContext : public statemap::FSMContext {
+public:
+  /**
+   * @brief 构造函数，初始化状态机上下文对象。
+   * @param owner BondSM对象的引用。
+   * @details
+   * 通过调用基类构造函数，将初始状态设置为SM::WaitingForSister，并将owner参数保存到_owner成员变量中。
+   */
+  explicit BondSMContext(BondSM &owner) : FSMContext(SM::WaitingForSister), _owner(owner) {}
 
-  BondSM & getOwner() const
-  {
-    return _owner;
-  }
+  /**
+   * @brief 构造函数，初始化状态机上下文对象。
+   * @param owner BondSM对象的引用。
+   * @param state 状态机的初始状态。
+   * @details 通过调用基类构造函数，将初始状态设置为state，并将owner参数保存到_owner成员变量中。
+   */
+  BondSMContext(BondSM &owner, const statemap::State &state) : FSMContext(state), _owner(owner) {}
 
-  BondSMState & getState() const
-  {
+  /**
+   * @brief 进入状态机的起始状态。
+   * @details 调用当前状态的Entry函数。
+   */
+  virtual void enterStartState() { getState().Entry(*this); }
+
+  /**
+   * @brief 获取BondSM对象的引用。
+   * @return 返回BondSM对象的引用。
+   */
+  BondSM &getOwner() const { return _owner; }
+
+  /**
+   * @brief 获取当前状态。
+   * @return 返回当前状态。
+   * @details 如果当前状态为NULL，则抛出StateUndefinedException异常。
+   */
+  BondSMState &getState() const {
     if (_state == NULL) {
       throw statemap::StateUndefinedException();
     }
-
     return dynamic_cast<BondSMState &>(*_state);
   }
 
-  void ConnectTimeout()
-  {
-    (getState()).ConnectTimeout(*this);
-  }
+  /**
+   * @brief 连接超时处理函数。
+   * @details 调用当前状态的ConnectTimeout函数。
+   */
+  void ConnectTimeout() { (getState()).ConnectTimeout(*this); }
 
-  void Die()
-  {
-    (getState()).Die(*this);
-  }
+  /**
+   * @brief 组件死亡处理函数。
+   * @details 调用当前状态的Die函数。
+   */
+  void Die() { (getState()).Die(*this); }
 
-  void DisconnectTimeout()
-  {
-    (getState()).DisconnectTimeout(*this);
-  }
+  /**
+   * @brief 断开连接超时处理函数。
+   * @details 调用当前状态的DisconnectTimeout函数。
+   */
+  void DisconnectTimeout() { (getState()).DisconnectTimeout(*this); }
 
-  void HeartbeatTimeout()
-  {
-    (getState()).HeartbeatTimeout(*this);
-  }
+  /**
+   * @brief 心跳超时处理函数。
+   * @details 调用当前状态的HeartbeatTimeout函数。
+   */
+  void HeartbeatTimeout() { (getState()).HeartbeatTimeout(*this); }
 
-  void SisterAlive()
-  {
-    (getState()).SisterAlive(*this);
-  }
+  /**
+   * @brief 姐妹组件存活处理函数。
+   * @details 调用当前状态的SisterAlive函数。
+   */
+  void SisterAlive() { (getState()).SisterAlive(*this); }
 
-  void SisterDead()
-  {
-    (getState()).SisterDead(*this);
-  }
+  /**
+   * @brief 姐妹组件死亡处理函数。
+   * @details 调用当前状态的SisterDead函数。
+   */
+  void SisterDead() { (getState()).SisterDead(*this); }
 
 private:
-  BondSM & _owner;
+  BondSM &_owner; /**< BondSM对象的引用。*/
 };
-
 
 /*
  * Local variables:

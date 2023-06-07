@@ -36,56 +36,86 @@
  * from file : BondSM_sm.sm
  */
 
-#include "bondcpp/bond.hpp"
 #include "bondcpp/BondSM_sm.hpp"
 
+#include "bondcpp/bond.hpp"
+
+/*
+代码功能：这段代码是一个 bondcpp 组件相关的代码，其中定义了一个 BondSMState
+类和一些静态类。BondSMState 类中包含了
+ConnectTimeout、Die、DisconnectTimeout、HeartbeatTimeout、SisterAlive、SisterDead 和 Default
+函数的实现。这些函数都调用了 Default 函数，如果 Default 函数被调用，则会抛出
+TransitionUndefinedException 异常。
+*/
 // Static class declarations.
+// 静态类声明
 SM_WaitingForSister SM::WaitingForSister("SM::WaitingForSister", 0);
 SM_Alive SM::Alive("SM::Alive", 1);
 SM_AwaitSisterDeath SM::AwaitSisterDeath("SM::AwaitSisterDeath", 2);
 SM_Dead SM::Dead("SM::Dead", 3);
 
-void BondSMState::ConnectTimeout(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 ConnectTimeout 函数实现
+void BondSMState::ConnectTimeout(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::Die(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 Die 函数实现
+void BondSMState::Die(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::DisconnectTimeout(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 DisconnectTimeout 函数实现
+void BondSMState::DisconnectTimeout(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::HeartbeatTimeout(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 HeartbeatTimeout 函数实现
+void BondSMState::HeartbeatTimeout(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::SisterAlive(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 SisterAlive 函数实现
+void BondSMState::SisterAlive(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::SisterDead(BondSMContext & context)
-{
-  Default(context);
+// BondSMState 类中的 SisterDead 函数实现
+void BondSMState::SisterDead(BondSMContext& context) {
+  Default(context);  // 调用 Default 函数
 }
 
-void BondSMState::Default(BondSMContext & context)
-{
-  throw (
-          statemap::TransitionUndefinedException(
-            context.getState().getName(),
-            context.getTransition()));
+// BondSMState 类中的 Default 函数实现
+void BondSMState::Default(BondSMContext& context) {
+  throw(statemap::TransitionUndefinedException(
+      context.getState().getName(),
+      context.getTransition()));  // 抛出 TransitionUndefinedException 异常
 }
 
-void SM_WaitingForSister::ConnectTimeout(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/*
+以上代码是一个 bondcpp 组件相关的代码段，其中定义了三个函数：ConnectTimeout、Die 和
+SisterAlive。这三个函数都接受一个 BondSMContext 类型的上下文对象作为参数。
+
+ConnectTimeout 函数表示等待姐妹连接超时的情况，当姐妹连接超时时，会调用该函数。在该函数中，首先获取
+BondSMContext 对象所属的 BondSM 对象，然后退出当前状态并清除状态，接着调用 Death() 函数，设置状态为
+Dead，最后进入新的状态。
+
+Die 函数表示姐妹死亡的情况，当姐妹死亡时，会调用该函数。在该函数中，首先获取 BondSMContext
+对象所属的 BondSM 对象，然后退出当前状态并清除状态，接着调用 Death() 函数，设置状态为
+Dead，最后进入新的状态。
+
+SisterAlive 函数表示姐妹存活的情况，当姐妹存活时，会调用该函数。在该函数中，首先获取 BondSMContext
+对象所属的 BondSM 对象，然后退出当前状态并清除状态，接着调用 Connected() 函数，设置状态为
+Alive，最后进入新的状态。
+*/
+/**
+ * @brief 等待姐妹连接超时函数
+ * @param context BondSMContext类型的上下文对象
+ * @details
+ * 当等待姐妹连接超时时，会调用该函数。在该函数中，首先获取BondSMContext对象所属的BondSM对象，
+ *          然后退出当前状态并清除状态，接着调用Death()函数，设置状态为Dead，最后进入新的状态。
+ */
+void SM_WaitingForSister::ConnectTimeout(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
   (context.getState()).Exit(context);
   context.clearState();
@@ -99,9 +129,14 @@ void SM_WaitingForSister::ConnectTimeout(BondSMContext & context)
   (context.getState()).Entry(context);
 }
 
-void SM_WaitingForSister::Die(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief 姐妹死亡函数
+ * @param context BondSMContext类型的上下文对象
+ * @details 当姐妹死亡时，会调用该函数。在该函数中，首先获取BondSMContext对象所属的BondSM对象，
+ *          然后退出当前状态并清除状态，接着调用Death()函数，设置状态为Dead，最后进入新的状态。
+ */
+void SM_WaitingForSister::Die(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
   (context.getState()).Exit(context);
   context.clearState();
@@ -115,9 +150,14 @@ void SM_WaitingForSister::Die(BondSMContext & context)
   (context.getState()).Entry(context);
 }
 
-void SM_WaitingForSister::SisterAlive(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief 姐妹存活函数
+ * @param context BondSMContext类型的上下文对象
+ * @details 当姐妹存活时，会调用该函数。在该函数中，首先获取BondSMContext对象所属的BondSM对象，
+ *          然后退出当前状态并清除状态，接着调用Connected()函数，设置状态为Alive，最后进入新的状态。
+ */
+void SM_WaitingForSister::SisterAlive(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
   (context.getState()).Exit(context);
   context.clearState();
@@ -131,99 +171,226 @@ void SM_WaitingForSister::SisterAlive(BondSMContext & context)
   (context.getState()).Entry(context);
 }
 
-void SM_WaitingForSister::SisterDead(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/*
+以上代码段是一个基于bondcpp组件的状态机实现。其中包含了三个函数：SM_WaitingForSister::SisterDead、SM_Alive::Die和SM_Alive::HeartbeatTimeout。
 
+这些函数分别对应状态机中不同的状态转移。在每个函数中，首先会退出当前状态，然后清空状态机上下文中的状态，并根据当前状态执行相应的操作。最后，将状态机状态设置为新的状态，并进入该状态。
+
+其中SM_WaitingForSister::SisterDead函数是在等待姐妹死亡状态下的姐妹死亡函数，会调用Connected、SisterDied和Death函数，并将状态机状态设置为Dead。
+
+SM_Alive::Die函数是在活着状态下的死亡函数，会调用StartDying函数，并将状态机状态设置为AwaitSisterDeath。
+
+SM_Alive::HeartbeatTimeout函数是在活着状态下的心跳超时函数，会调用Death函数，并将状态机状态设置为Dead。
+*/
+/**
+ * @brief 等待姐妹死亡状态下的姐妹死亡函数
+ * @param context BondSMContext对象，表示状态机上下文
+ * @details 根据当前状态机上下文中的状态执行相应的操作，将状态机状态设置为Dead
+ */
+void SM_WaitingForSister::SisterDead(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
+
+  // 退出当前状态
   (context.getState()).Exit(context);
+  // 清空状态机上下文中的状态
   context.clearState();
   try {
+    // 调用Connected、SisterDied和Death函数
     ctxt.Connected();
     ctxt.SisterDied();
     ctxt.Death();
+    // 将状态机状态设置为Dead
     context.setState(SM::Dead);
   } catch (...) {
+    // 如果发生异常，则将状态机状态设置为Dead并抛出异常
     context.setState(SM::Dead);
     throw;
   }
+  // 进入新的状态
   (context.getState()).Entry(context);
 }
 
-void SM_Alive::Die(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief 活着状态下的死亡函数
+ * @param context BondSMContext对象，表示状态机上下文
+ * @details 根据当前状态机上下文中的状态执行相应的操作，将状态机状态设置为AwaitSisterDeath
+ */
+void SM_Alive::Die(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
+  // 退出当前状态
   (context.getState()).Exit(context);
+  // 清空状态机上下文中的状态
   context.clearState();
   try {
+    // 调用StartDying函数
     ctxt.StartDying();
+    // 将状态机状态设置为AwaitSisterDeath
     context.setState(SM::AwaitSisterDeath);
   } catch (...) {
+    // 如果发生异常，则将状态机状态设置为AwaitSisterDeath并抛出异常
     context.setState(SM::AwaitSisterDeath);
     throw;
   }
+  // 进入新的状态
   (context.getState()).Entry(context);
 }
 
-void SM_Alive::HeartbeatTimeout(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief 活着状态下的心跳超时函数
+ * @param context BondSMContext对象，表示状态机上下文
+ * @details 根据当前状态机上下文中的状态执行相应的操作，将状态机状态设置为Dead
+ */
+void SM_Alive::HeartbeatTimeout(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
+  // 退出当前状态
   (context.getState()).Exit(context);
+  // 清空状态机上下文中的状态
   context.clearState();
   try {
+    // 调用Death函数
     ctxt.Death();
+    // 将状态机状态设置为Dead
     context.setState(SM::Dead);
   } catch (...) {
+    // 如果发生异常，则将状态机状态设置为Dead并抛出异常
     context.setState(SM::Dead);
     throw;
   }
+  // 进入新的状态
   (context.getState()).Entry(context);
 }
 
-void SM_Alive::SisterAlive(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/*
+代码段中定义了四个函数，分别是 SM_Alive::SisterAlive、SM_Alive::SisterDead、SM_AwaitSisterDeath::Die
+和 SM_AwaitSisterDeath::DisconnectTimeout。
 
-  (context.getState()).Exit(context);
-  context.clearState();
+其中，SM_Alive::SisterAlive 函数表示当姐妹节点存活时，执行心跳操作并将状态设置为
+Alive；SM_Alive::SisterDead 函数表示当姐妹节点死亡时，执行 SisterDied 和 Death 操作，并将状态设置为
+Dead；SM_AwaitSisterDeath::Die 函数表示当姐妹节点死亡时，将状态设置为
+AwaitSisterDeath；SM_AwaitSisterDeath::DisconnectTimeout 函数表示当连接超时时，执行 Death
+操作，并将状态设置为 Dead。
+
+这些函数都接受一个 BondSMContext
+类型的参数，表示状态机上下文。在函数中，首先会退出当前状态，然后清除当前状态，接着根据不同的情况执行相应的操作，最后将状态设置为新的状态并进入该状态。
+*/
+/**
+ * @brief SisterAlive 函数
+ * @param context BondSMContext 类型的参数，表示状态机上下文
+ * @details 当姐妹节点存活时，执行心跳操作并将状态设置为 Alive。
+ */
+void SM_Alive::SisterAlive(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
+
+  (context.getState()).Exit(context);  // 退出当前状态
+  context.clearState();                // 清除当前状态
   try {
-    ctxt.Heartbeat();
-    context.setState(SM::Alive);
+    ctxt.Heartbeat();                  // 执行心跳操作
+    context.setState(SM::Alive);       // 设置状态为 Alive
   } catch (...) {
-    context.setState(SM::Alive);
+    context.setState(SM::Alive);       // 设置状态为 Alive
     throw;
   }
-  (context.getState()).Entry(context);
+  (context.getState()).Entry(context);  // 进入新状态
 }
 
-void SM_Alive::SisterDead(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief SisterDead 函数
+ * @param context BondSMContext 类型的参数，表示状态机上下文
+ * @details 当姐妹节点死亡时，执行 SisterDied 和 Death 操作，并将状态设置为 Dead。
+ */
+void SM_Alive::SisterDead(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
-  (context.getState()).Exit(context);
-  context.clearState();
+  (context.getState()).Exit(context);  // 退出当前状态
+  context.clearState();                // 清除当前状态
   try {
-    ctxt.SisterDied();
-    ctxt.Death();
-    context.setState(SM::Dead);
+    ctxt.SisterDied();                 // 姐妹节点死亡
+    ctxt.Death();                      // 执行死亡操作
+    context.setState(SM::Dead);        // 设置状态为 Dead
   } catch (...) {
-    context.setState(SM::Dead);
+    context.setState(SM::Dead);        // 设置状态为 Dead
     throw;
   }
-  (context.getState()).Entry(context);
+  (context.getState()).Entry(context);  // 进入新状态
 }
 
-void SM_AwaitSisterDeath::Die(BondSMContext & context)
-{
+/**
+ * @brief Die 函数
+ * @param context BondSMContext 类型的参数，表示状态机上下文
+ * @details 当姐妹节点死亡时，将状态设置为 AwaitSisterDeath。
+ */
+void SM_AwaitSisterDeath::Die(BondSMContext& context) {
+  (context.getState()).Exit(context);      // 退出当前状态
+  context.setState(SM::AwaitSisterDeath);  // 设置状态为 AwaitSisterDeath
+  (context.getState()).Entry(context);     // 进入新状态
+}
+
+/**
+ * @brief DisconnectTimeout 函数
+ * @param context BondSMContext 类型的参数，表示状态机上下文
+ * @details 当连接超时时，执行 Death 操作，并将状态设置为 Dead。
+ */
+void SM_AwaitSisterDeath::DisconnectTimeout(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
+
+  (context.getState()).Exit(context);  // 退出当前状态
+  context.clearState();                // 清除当前状态
+  try {
+    ctxt.Death();                      // 执行死亡操作
+    context.setState(SM::Dead);        // 设置状态为 Dead
+  } catch (...) {
+    context.setState(SM::Dead);        // 设置状态为 Dead
+    throw;
+  }
+  (context.getState()).Entry(context);  // 进入新状态
+}
+
+/*
+代码段中是一个 bondcpp 组件相关的状态机实现。其中包含了两个状态机：AwaitSisterDeath 和
+Dead。每个状态机都有多个状态和对应的状态转移函数。
+
+具体来说，AwaitSisterDeath 状态机包含三个状态：HeartbeatTimeout、SisterAlive 和
+SisterDead。当心跳超时时，会执行 HeartbeatTimeout 函数；当姐妹存活时，会执行 SisterAlive
+函数；当姐妹死亡时，会执行 SisterDead 函数。在 SisterDead 函数中，会获取上下文所属的 BondSM
+对象，调用其 Death 函数，将状态设置为 Dead，并再次进入该状态。如果调用 Death
+函数出现异常，则将状态设置为 Dead 并抛出异常。
+
+Dead 状态机包含两个状态：ConnectTimeout 和 Die。当连接超时时，会执行 ConnectTimeout
+函数；当需要死亡时，会执行 Die 函数。在这两个函数中，都是将状态设置为 Dead，并再次进入该状态。
+*/
+/**
+ * @brief 等待姐妹死亡状态机的心跳超时函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，设置状态为 AwaitSisterDeath，再次进入该状态
+ */
+void SM_AwaitSisterDeath::HeartbeatTimeout(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::AwaitSisterDeath);
   (context.getState()).Entry(context);
 }
 
-void SM_AwaitSisterDeath::DisconnectTimeout(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
+/**
+ * @brief 姐妹存活函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，设置状态为 AwaitSisterDeath，再次进入该状态
+ */
+void SM_AwaitSisterDeath::SisterAlive(BondSMContext& context) {
+  (context.getState()).Exit(context);
+  context.setState(SM::AwaitSisterDeath);
+  (context.getState()).Entry(context);
+}
+
+/**
+ * @brief 姐妹死亡函数
+ * @param context BondSMContext 上下文对象
+ * @details 获取上下文所属的 BondSM 对象，退出当前状态，清空状态，
+ *          调用 BondSM 的 Death 函数，将状态设置为 Dead，再次进入该状态
+ *          如果调用 Death 函数出现异常，则将状态设置为 Dead 并抛出异常
+ */
+void SM_AwaitSisterDeath::SisterDead(BondSMContext& context) {
+  BondSM& ctxt(context.getOwner());
 
   (context.getState()).Exit(context);
   context.clearState();
@@ -237,73 +404,75 @@ void SM_AwaitSisterDeath::DisconnectTimeout(BondSMContext & context)
   (context.getState()).Entry(context);
 }
 
-void SM_AwaitSisterDeath::HeartbeatTimeout(BondSMContext & context)
-{
-  (context.getState()).Exit(context);
-  context.setState(SM::AwaitSisterDeath);
-  (context.getState()).Entry(context);
-}
-
-void SM_AwaitSisterDeath::SisterAlive(BondSMContext & context)
-{
-  (context.getState()).Exit(context);
-  context.setState(SM::AwaitSisterDeath);
-  (context.getState()).Entry(context);
-}
-
-void SM_AwaitSisterDeath::SisterDead(BondSMContext & context)
-{
-  BondSM & ctxt(context.getOwner());
-
-  (context.getState()).Exit(context);
-  context.clearState();
-  try {
-    ctxt.Death();
-    context.setState(SM::Dead);
-  } catch (...) {
-    context.setState(SM::Dead);
-    throw;
-  }
-  (context.getState()).Entry(context);
-}
-
-void SM_Dead::ConnectTimeout(BondSMContext & context)
-{
+/**
+ * @brief 死亡状态机的连接超时函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，设置状态为 Dead，再次进入该状态
+ */
+void SM_Dead::ConnectTimeout(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
 }
 
-void SM_Dead::Die(BondSMContext & context)
-{
+/**
+ * @brief 死亡函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，设置状态为 Dead，再次进入该状态
+ */
+void SM_Dead::Die(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
 }
 
-void SM_Dead::DisconnectTimeout(BondSMContext & context)
-{
+/*
+这段代码是 bondcpp 组件中的状态机（state machine）实现。其中 SM_Dead
+是状态机中的一个状态，包含了四个处理函数：DisconnectTimeout、HeartbeatTimeout、SisterAlive 和
+SisterDead。这些处理函数都接受一个 BondSMContext 上下文对象作为参数，用于在状态之间传递信息。
+
+这些处理函数的功能都非常相似，都是先退出当前状态，将状态设置为
+Dead，再重新进入当前状态。这种设计可能是为了保证状态机的一致性和可靠性。
+*/
+/**
+ * @brief 断开连接超时处理函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，将状态设置为 Dead，再重新进入当前状态
+ */
+void SM_Dead::DisconnectTimeout(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
 }
 
-void SM_Dead::HeartbeatTimeout(BondSMContext & context)
-{
+/**
+ * @brief 心跳超时处理函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，将状态设置为 Dead，再重新进入当前状态
+ */
+void SM_Dead::HeartbeatTimeout(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
 }
 
-void SM_Dead::SisterAlive(BondSMContext & context)
-{
+/**
+ * @brief SisterAlive 处理函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，将状态设置为 Dead，再重新进入当前状态
+ */
+void SM_Dead::SisterAlive(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
 }
 
-void SM_Dead::SisterDead(BondSMContext & context)
-{
+/**
+ * @brief SisterDead 处理函数
+ * @param context BondSMContext 上下文对象
+ * @details 退出当前状态，将状态设置为 Dead，再重新进入当前状态
+ */
+void SM_Dead::SisterDead(BondSMContext& context) {
   (context.getState()).Exit(context);
   context.setState(SM::Dead);
   (context.getState()).Entry(context);
